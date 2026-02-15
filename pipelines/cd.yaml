@@ -1,0 +1,55 @@
+trigger:
+- master
+
+variables:
+  azureServiceConnection: AzureServiceConnection
+  buildConfiguration: Release
+  apiAppName: lab11api012345
+
+- stage: BuildApi
+  displayName: API - Build & Deploy
+  dependsOn: TerraformApply
+  jobs:
+  - job: BuildApi
+    pool:
+      vmImage: windows-latest
+    steps:
+    - checkout: self
+
+    - task: UseDotNet@2
+      inputs:
+        version: '8.0.x'
+
+    - task: DotNetCoreCLI@2
+      displayName: Publish API
+      inputs:
+        command: publish
+        publishWebProjects: false
+        projects: code/Api/Api.csproj
+        arguments: >-
+          -c $(buildConfiguration)
+          -o $(Pipeline.Workspace)/api
+     
+    - publish: $(Pipeline.Workspace)/api
+      artifact: artifact-api
+
+- stage: DeployApi
+  displayName: Deploy API Function
+  dependsOn: BuildApi
+  jobs:
+  - job: DeployApi
+    pool:
+      vmImage: windows-latest
+    steps:
+      - task: DownloadPipelineArtifact@2
+        displayName: Download api artifact
+        inputs:
+          buildType: current
+          artifact: artifact-api
+          path: $(Pipeline.Workspace)/api
+      - task: AzureFunctionApp@2
+        inputs:
+          AzureSubscription: $(azureServiceConnection)
+          appType: functionApp
+          appName: $(apiAppName)
+          package: $(Pipeline.Workspace)/api/**/*.zip
