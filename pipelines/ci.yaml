@@ -49,6 +49,7 @@ stages:
         timeoutInMinutes: 60
 
   - job: Job1
+    dependsOn: ManualApproval
     displayName: First job in second stage
     pool:
       vmImage: ubuntu-latest
@@ -63,6 +64,7 @@ stages:
       displayName: 'Second step: Run a multi-line script'
 
   - job: Job2
+    dependsOn: Job1
     displayName: Second job in second stage
     pool:
       vmImage: ubuntu-latest
