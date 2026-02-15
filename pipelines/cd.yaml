@@ -9,7 +9,6 @@ variables:
 stages:
 - stage: BuildApi
   displayName: API - Build & Deploy
-  dependsOn: TerraformApply
   jobs:
   - job: BuildApi
     pool:
