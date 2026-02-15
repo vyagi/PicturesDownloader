@@ -2,19 +2,63 @@ trigger:
 - master
 
 stages:
-- stage: Build
-  displayName: Build stage
+- stage: Stage1
+  displayName: First stage
   jobs:
-  - job: BuildJob
-    displayName: Build job
+  - job: Job1
+    displayName: First job in fist stage
     pool:
-      vmImage: windows-latest
+      vmImage: ubuntu-latest
 
     steps:
     - script: echo Hello, world!
-      displayName: 'Run a one-line script'
+      displayName: 'First step: Run a one-line script'
 
     - script: |
         echo Add other tasks to build, test, and deploy your project.
         echo See https://aka.ms/yaml
-      displayName: 'Run a multi-line script'
+      displayName: 'Second step: Run a multi-line script'
+
+  - job: Job2
+    displayName: Second job in first stage
+    pool:
+      vmImage: ubuntu-latest
+
+    steps:
+    - script: echo Hello, world!
+      displayName: 'First step: Run a one-line script'
+
+    - script: |
+        echo Add other tasks to build, test, and deploy your project.
+        echo See https://aka.ms/yaml
+      displayName: 'Second step: Run a multi-line script'
+
+- stage: Stage2
+  displayName: Second stage
+  jobs:
+  - job: Job1
+    displayName: First job in second stage
+    pool:
+      vmImage: ubuntu-latest
+
+    steps:
+    - script: echo Hello, world!
+      displayName: 'First step: Run a one-line script'
+
+    - script: |
+        echo Add other tasks to build, test, and deploy your project.
+        echo See https://aka.ms/yaml
+      displayName: 'Second step: Run a multi-line script'
+
+  - job: Job2
+    displayName: Second job in second stage
+    pool:
+      vmImage: ubuntu-latest
+
+    steps:
+    - script: echo Hello, world!
+      displayName: 'First step: Run a one-line script'
+
+    - script: |
+        echo Add other tasks to build, test, and deploy your project.
+        echo See https://aka.ms/yaml
