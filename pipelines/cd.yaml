@@ -57,7 +57,6 @@ stages:
 
 - stage: BuildDownloader
   displayName: Downloader - Build & Deploy
-  dependsOn: TerraformApply
   jobs:
   - job: BuildDownloader
     pool:
