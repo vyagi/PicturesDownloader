@@ -36,6 +36,18 @@ stages:
 - stage: Stage2
   displayName: Second stage
   jobs:
+  - job: ManualApproval
+    displayName: Manual validation before Stage2
+    pool: server
+    steps:
+    - task: ManualValidation@0
+      inputs:
+        instructions: |
+          Please approve to continue to Stage2.
+          Verify results from Stage1.
+        onTimeout: reject
+        timeoutInMinutes: 60
+
   - job: Job1
     displayName: First job in second stage
     pool:
