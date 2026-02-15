@@ -2,77 +2,23 @@ trigger:
 - master
 
 stages:
-- stage: Stage1
-  displayName: First stage
+- stage: VerifyCode
+  displayName: Code verification
   jobs:
-  - job: Job1
-    displayName: First job in fist stage
+
+  - job: Build
+    displayName: Build Azure Functions
     pool:
       vmImage: ubuntu-latest
-
     steps:
-    - script: echo Hello, world!
-      displayName: 'First step: Run a one-line script'
+    - checkout: self
 
-    - script: |
-        echo Add other tasks to build, test, and deploy your project.
-        echo See https://aka.ms/yaml
-      displayName: 'Second step: Run a multi-line script'
-
-  - job: Job2
-    displayName: Second job in first stage
-    pool:
-      vmImage: ubuntu-latest
-
-    steps:
-    - script: echo Hello, world!
-      displayName: 'First step: Run a one-line script'
-
-    - script: |
-        echo Add other tasks to build, test, and deploy your project.
-        echo See https://aka.ms/yaml
-      displayName: 'Second step: Run a multi-line script'
-
-- stage: Stage2
-  displayName: Second stage
-  jobs:
-  - job: ManualApproval
-    displayName: Manual validation before Stage2
-    pool: server
-    steps:
-    - task: ManualValidation@0
+    - task: UseDotNet@2
       inputs:
-        instructions: |
-          Please approve to continue to Stage2.
-          Verify results from Stage1.
-        onTimeout: reject
-        timeoutInMinutes: 60
+        version: '8.0.x'
 
-  - job: Job1
-    dependsOn: ManualApproval
-    displayName: First job in second stage
-    pool:
-      vmImage: ubuntu-latest
+    - script: dotnet build Api --configuration Release
+      displayName: Build Api function
 
-    steps:
-    - script: echo Hello, world!
-      displayName: 'First step: Run a one-line script'
-
-    - script: |
-        echo Add other tasks to build, test, and deploy your project.
-        echo See https://aka.ms/yaml
-      displayName: 'Second step: Run a multi-line script'
-
-  - job: Job2
-    dependsOn: Job1
-    displayName: Second job in second stage
-    pool:
-      vmImage: ubuntu-latest
-
-    steps:
-    - script: echo Hello, world!
-      displayName: 'First step: Run a one-line script'
-
-    - script: |
-        echo Add other tasks to build, test, and deploy your project.
-        echo See https://aka.ms/yaml
+    - script: dotnet build Downloader --configuration Release
+      displayName: Build Downloader function
