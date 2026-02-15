@@ -17,8 +17,8 @@ stages:
       inputs:
         version: '8.0.x'
 
-    - script: dotnet build Api --configuration Release
+    - script: dotnet build code/Api --configuration Release
       displayName: Build Api function
 
-    - script: dotnet build Downloader --configuration Release
+    - script: dotnet build code/Downloader --configuration Release
       displayName: Build Downloader function
