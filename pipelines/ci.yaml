@@ -9,7 +9,7 @@ stages:
   - job: Api
     displayName: Api build & verify
     pool:
-      vmImage: ubuntu-latest
+      vmImage: windows-latest
     steps:
     - checkout: self
 
@@ -26,7 +26,7 @@ stages:
   - job: Downloader
     displayName: Downloader build & verify
     pool:
-      vmImage: ubuntu-latest
+      vmImage: windows-latest
     steps:
     - checkout: self
 
@@ -36,4 +36,21 @@ stages:
 
     - script: dotnet build code/Downloader --configuration Release
       displayName: Build Downloader
-  
+
+- stage: TerraformValidate
+  displayName: Terraform validation
+  dependsOn: VerifyCode
+  jobs:
+
+  - job: Terraform
+    displayName: Terraform validate
+    pool:
+      vmImage: windows-latest
+    steps:
+    - checkout: self
+
+    - script: |
+        cd terraform
+        terraform init -backend=false
+        terraform validate
+      displayName: Terraform init & validate
