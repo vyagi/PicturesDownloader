@@ -5,6 +5,6 @@ public class ApiUnitTests
     [Fact]
     public void ExampleTest()
     {
-        Assert.True(true);
+        Assert.True(false);
     }
 }
