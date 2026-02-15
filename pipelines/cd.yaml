@@ -6,6 +6,7 @@ variables:
   buildConfiguration: Release
   apiAppName: lab11api012345
 
+stages:
 - stage: BuildApi
   displayName: API - Build & Deploy
   dependsOn: TerraformApply
