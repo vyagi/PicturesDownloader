@@ -5,6 +5,7 @@ variables:
   azureServiceConnection: AzureServiceConnection
   buildConfiguration: Release
   apiAppName: lab11api012345
+  downloaderAppName: lab11downloader012345
 
 stages:
 - stage: BuildApi
@@ -53,3 +54,51 @@ stages:
           appType: functionApp
           appName: $(apiAppName)
           package: $(Pipeline.Workspace)/api/**/*.zip
+
+- stage: BuildDownloader
+  displayName: Downloader - Build & Deploy
+  dependsOn: TerraformApply
+  jobs:
+  - job: BuildDownloader
+    pool:
+      vmImage: windows-latest
+    steps:
+    - checkout: self
+
+    - task: UseDotNet@2
+      inputs:
+        version: '8.0.x'
+
+    - task: DotNetCoreCLI@2
+      displayName: Publish Downloader
+      inputs:
+        command: publish
+        publishWebProjects: false
+        projects: code/Downloader/Downloader.csproj
+        arguments: >-
+          -c $(buildConfiguration)
+          -o $(Pipeline.Workspace)/downloader
+     
+    - publish: $(Pipeline.Workspace)/downloader
+      artifact: artifact-downloader
+
+- stage: DeployDownloader
+  displayName: Deploy Downloader Function
+  dependsOn: BuildDownloader
+  jobs:
+  - job: DeployDownloader
+    pool:
+      vmImage: windows-latest
+    steps:
+      - task: DownloadPipelineArtifact@2
+        displayName: Download downloader artifact
+        inputs:
+          buildType: current
+          artifact: artifact-downloader
+          path: $(Pipeline.Workspace)/downloader
+      - task: AzureFunctionApp@2
+        inputs:
+          AzureSubscription: $(azureServiceConnection)
+          appType: functionApp
+          appName: $(downloaderAppName)
+          package: $(Pipeline.Workspace)/downloader/**/*.zip
