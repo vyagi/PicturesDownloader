@@ -2,14 +2,97 @@ trigger:
 - master
 
 variables:
+  terraformWorkingDir: terraform
   azureServiceConnection: AzureServiceConnection
+  terraformVersion: 1.6.6
   buildConfiguration: Release
   apiAppName: lab11api012345
   downloaderAppName: lab11downloader012345
 
 stages:
+- stage: TerraformPlan
+  displayName: Terraform Plan
+  jobs:
+  - job: Plan
+    pool:
+      vmImage: windows-latest
+    steps:
+    - checkout: self
+
+    - task: TerraformInstaller@1
+      inputs:
+        terraformVersion: $(terraformVersion)
+
+    - task: TerraformTaskV4@4
+      inputs:
+        provider: azurerm
+        command: init
+        workingDirectory: $(terraformWorkingDir)
+        backendServiceArm: $(azureServiceConnection)
+        backendAzureRmResourceGroupName: LabCommon
+        backendAzureRmStorageAccountName: common012345
+        backendAzureRmContainerName: terraform
+        backendAzureRmKey: lab11.tfstate
+
+    - task: TerraformTaskV4@4
+      inputs:
+        provider: azurerm
+        command: plan
+        workingDirectory: $(terraformWorkingDir)
+        environmentServiceNameAzureRM: $(azureServiceConnection)
+
+- stage: ManualApproval
+  displayName: Manual validation
+  dependsOn: TerraformPlan
+  jobs:
+  - job: WaitForApproval
+    pool: server
+    steps:
+    - task: ManualValidation@0
+      inputs:
+        instructions: |
+          Review terraform plan.
+          Approve to apply infrastructure changes.
+        onTimeout: reject
+        timeoutInMinutes: 1440
+
+- stage: TerraformApply
+  displayName: Terraform Apply
+  dependsOn: ManualApproval
+  jobs:
+  - job: Apply
+    pool:
+      vmImage: windows-latest
+    steps:
+    - checkout: self
+
+    - task: TerraformInstaller@1
+      inputs:
+        terraformVersion: $(terraformVersion)
+
+    - task: TerraformTaskV4@4
+      inputs:
+        provider: azurerm
+        command: init
+        workingDirectory: $(terraformWorkingDir)
+        environmentServiceNameAzureRM: $(azureServiceConnection)
+        backendServiceArm: $(azureServiceConnection)
+        backendAzureRmResourceGroupName: LabCommon
+        backendAzureRmStorageAccountName: common012345
+        backendAzureRmContainerName: terraform
+        backendAzureRmKey: lab11.tfstate
+
+    - task: TerraformTaskV4@4
+      inputs:
+        provider: azurerm
+        command: apply
+        workingDirectory: $(terraformWorkingDir)
+        environmentServiceNameAzureRM: $(azureServiceConnection)
+        commandOptions: -auto-approve
+
 - stage: BuildApi
   displayName: API - Build & Deploy
+  dependsOn: TerraformApply
   jobs:
   - job: BuildApi
     pool:
@@ -57,6 +140,7 @@ stages:
 
 - stage: BuildDownloader
   displayName: Downloader - Build & Deploy
+  dependsOn: TerraformApply
   jobs:
   - job: BuildDownloader
     pool:
