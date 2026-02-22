@@ -32,13 +32,6 @@ stages:
     steps:
     - checkout: self
 
-    - task: SonarCloudPrepare@4
-      inputs:
-        SonarQube: 'SonarQubeConnection'
-        organization: 'instr1-cloud'
-        scannerMode: 'dotnet'
-        projectKey: '38c4be1d8308da7d5d41046ae08252840707fa55'
-
     - task: UseDotNet@2
       inputs:
         version: '8.0.x'
