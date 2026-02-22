@@ -26,10 +26,10 @@ stages:
         scannerMode: 'dotnet'
         projectKey: 'vyagi_PicturesDownloader'
 
-    - script: dotnet build PicturesDownloader.sln --configuration Release
+    - script: dotnet build code/PicturesDownloader.sln --configuration Release
       displayName: Build solution
 
-    - script: dotnet test PicturesDownloader.sln --configuration Release
+    - script: dotnet test code/PicturesDownloader.sln --configuration Release
       displayName: Test solution
 
     - task: SonarCloudAnalyze@4
