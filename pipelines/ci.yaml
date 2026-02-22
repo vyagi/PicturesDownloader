@@ -37,7 +37,7 @@ stages:
         SonarQube: 'SonarQubeConnection'
         organization: 'instr1-cloud'
         scannerMode: 'dotnet'
-        projectKey: 'instr1-cloud'
+        projectKey: 'instr1-cloud_PictureDownloader'
         
     - task: UseDotNet@2
       inputs:
