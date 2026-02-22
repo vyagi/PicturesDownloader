@@ -18,12 +18,25 @@ stages:
     - task: UseDotNet@2
       inputs:
         version: '8.0.x'
+    - task: SonarCloudPrepare@4
+      inputs:
+        SonarQube: 'SonarQubeConnection'
+        organization: 'vyagi-1'
+        scannerMode: 'dotnet'
+        projectKey: 'vyagi_PicturesDownloader'
 
     - script: dotnet build code/Api --configuration Release
       displayName: Build Api
 
     - script: dotnet test code/ApiTests --configuration Release
       displayName: Test Api
+
+    - task: SonarCloudAnalyze@4
+      inputs:
+        jdkversion: 'JAVA_HOME_17_X64'
+    - task: SonarCloudPublish@4
+      inputs:
+        pollingTimeoutSec: '300'
 
   - job: Downloader
     displayName: Downloader build & verify
@@ -32,12 +45,6 @@ stages:
     steps:
     - checkout: self
 
-    - task: SonarCloudPrepare@4
-      inputs:
-        SonarQube: 'SonarQubeConnection'
-        organization: 'instr1-cloud'
-        scannerMode: 'dotnet'
-        projectKey: 'instr1-cloud_PictureDownloader'
         
     - task: UseDotNet@2
       inputs:
@@ -45,12 +52,6 @@ stages:
 
     - script: dotnet build code/Downloader --configuration Release
       displayName: Build Downloader
-    - task: SonarCloudAnalyze@4
-      inputs:
-        jdkversion: 'JAVA_HOME_17_X64'
-    - task: SonarCloudPublish@4
-      inputs:
-        pollingTimeoutSec: '300'
 
 - stage: TerraformValidate
   displayName: Terraform validation
