@@ -45,7 +45,12 @@ stages:
 
     - script: dotnet build code/Downloader --configuration Release
       displayName: Build Downloader
-
+    - task: SonarCloudAnalyze@4
+      inputs:
+        jdkversion: 'JAVA_HOME_17_X64'
+    - task: SonarCloudPublish@4
+      inputs:
+        pollingTimeoutSec: '300'
 
 - stage: TerraformValidate
   displayName: Terraform validation
