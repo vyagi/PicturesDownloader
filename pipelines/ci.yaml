@@ -37,7 +37,7 @@ stages:
         SonarQube: 'SonarQubeConnection'
         organization: 'instr1-cloud'
         scannerMode: 'dotnet'
-        projectKey: '38c4be1d8308da7d5d41046ae08252840707fa55'
+        projectKey: 'instr1-cloud'
         
     - task: UseDotNet@2
       inputs:
