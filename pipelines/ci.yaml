@@ -8,6 +8,38 @@ stages:
   displayName: Code verification
   jobs:
 
+  - job: SonarAnalysis
+    displayName: Sonar analysis
+    pool:
+      vmImage: windows-latest
+    steps:
+    - checkout: self
+
+    - task: UseDotNet@2
+      inputs:
+        version: '8.0.x'
+
+    - task: SonarCloudPrepare@4
+      inputs:
+        SonarQube: 'SonarQubeConnection'
+        organization: 'vyagi-1'
+        scannerMode: 'dotnet'
+        projectKey: 'vyagi_PicturesDownloader'
+
+    - script: dotnet build PicturesDownloader.sln --configuration Release
+      displayName: Build solution
+
+    - script: dotnet test PicturesDownloader.sln --configuration Release
+      displayName: Test solution
+
+    - task: SonarCloudAnalyze@4
+      inputs:
+        jdkversion: 'JAVA_HOME_17_X64'
+
+    - task: SonarCloudPublish@4
+      inputs:
+        pollingTimeoutSec: '300'
+
   - job: Api
     displayName: Api build & verify
     pool:
@@ -18,25 +50,12 @@ stages:
     - task: UseDotNet@2
       inputs:
         version: '8.0.x'
-    - task: SonarCloudPrepare@4
-      inputs:
-        SonarQube: 'SonarQubeConnection'
-        organization: 'vyagi-1'
-        scannerMode: 'dotnet'
-        projectKey: 'vyagi_PicturesDownloader'
 
     - script: dotnet build code/Api --configuration Release
       displayName: Build Api
 
     - script: dotnet test code/ApiTests --configuration Release
       displayName: Test Api
-
-    - task: SonarCloudAnalyze@4
-      inputs:
-        jdkversion: 'JAVA_HOME_17_X64'
-    - task: SonarCloudPublish@4
-      inputs:
-        pollingTimeoutSec: '300'
 
   - job: Downloader
     displayName: Downloader build & verify
